@@ -42,3 +42,40 @@ Step 5: Configure Connection Pool in Tomcat
     Note: Replace your_password_here with your MySQL password.
 
 Step 6: Change persistence.xml file
+
+Step 7: Create Entity Classes (Model)
+
+Step 8: Create the JPA Utility Class
+
+Step 9: Create Servlet for CRUD
+
+Step 10: Create web.xml file (optional for Jakarta EE 11)
+
+Step 11: Build and Deploy on Tomcat
+    Method 1: Using Maven (Generate WAR)
+        cd jakarta-jpa-hibernate
+        mvn clean package
+
+        The WAR file will be created in target/jakarta-jpa-hibernate.war.
+        Then:
+        Copy the WAR file to {tomcat-home}/webapps/
+        Run Tomcat: {tomcat-home}/bin/startup.sh (or .bat)
+
+    Method 2: In IntelliJ IDEA
+        Run → Edit Configurations
+        Add Tomcat Server → Local
+        In the Deployment tab:
+        Click + → Artifact → Select jakarta-jpa-hibernate:war exploded
+        Apply → OK
+        Run (Shift+F10)
+
+Step 12: Test the project
+    http://localhost:8080/jakarta-jpa-hibernate/customers
+
+    CRUD operations:
+    Create: Fill out the form and submit
+    Read: Display all customers in the table
+    Update: (Requires development in Servlet)
+    Delete: By sending a DELETE request (with a tool like Postman)
+    Postman:
+    DELETE http://localhost:8080/jakarta-jpa-hibernate/customers?id=1
