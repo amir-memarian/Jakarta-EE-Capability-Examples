@@ -1,0 +1,44 @@
+Step 1: Prerequisites (Installing Tools)
+-- JDK 17 (set JAVA_HOME)
+-- IntelliJ IDEA (Ultimate or Community)
+-- MySQL 8.0.31
+-- Apache Tomcat 11 (Download and Extract)
+-- Maven
+-- Git (for push to GitHub)
+
+Step 2: Create a project in IntelliJ IDEA
+    New Project → Jakarta EE
+    Settings:
+        Name: jakarta-jpa-hibernate
+        Language: Java
+        Build system: Maven
+        JDK: 17
+        Template: Web application
+    In the Dependencies section, add:
+        Servlet
+        JPA / Hibernate (we will complete it later in pom.xml)
+
+Step 3: Set up pom.xml
+
+Step 4: Create MySQL Database
+    CREATE DATABASE bankdb;
+    USE bankdb;
+    -- (optional - Hibernate creates the tables itself)
+
+Step 5: Configure Connection Pool in Tomcat
+    Change $CATALINA-HOME/conf/context.xml
+    <Context>
+        <Resource name="jdbc/BankPool"
+                  auth="Container"
+                  type="javax.sql.DataSource"
+                  driverClassName="com.mysql.cj.jdbc.Driver"
+                  url="jdbc:mysql://localhost:3306/bankdb?useSSL=false&amp;serverTimezone=UTC"
+                  username="root"
+                  password="your_password_here"
+                  maxTotal="20"
+                  maxIdle="10"
+                  maxWaitMillis="-1"/>
+    </Context>
+    Note: Replace your_password_here with your MySQL password.
+
+Step 6: Change persistence.xml file
