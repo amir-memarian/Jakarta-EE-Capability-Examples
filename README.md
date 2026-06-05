@@ -8,7 +8,6 @@ This repository contains a collection of practical projects demonstrating variou
 Below is the list of Jakarta projects included in this repository. Each project highlights a particular Jakarta EE capability.
 
 
-|------------------------------|-----------------------------------------|-----------------------------------------------------------------------------------|
 | Project                      | Capability Demonstrated                 | Description                                                                       |
 |------------------------------|-----------------------------------------|-----------------------------------------------------------------------------------|
 | `jakarta-servlet-example`    | Servlet API                             | Basic servlet handling, req/res lifecycle, and annotation-based configuration.    |
@@ -25,7 +24,6 @@ Below is the list of Jakarta projects included in this repository. Each project 
 | `jakarta-concurrency-example`| Jakarta Concurrency                     | Managed executor service, thread management in enterprise environment.            |
 | `jakarta-faces-primefaces`   | Jakarta Server Faces (JSF)              | Component-based UI with PrimeFaces, AJAX, and navigation rules.                   |
 | `jakarta-messaging-activemq` | Jakarta Messaging (JMS)                 | Point-to-point and publish/subscribe messaging with ActiveMQ.                     |
-|------------------------------|-----------------------------------------|-----------------------------------------------------------------------------------|
 
 > \*\*Note\*\*: Click on any project name in the list to view its source code and detailed instructions. (Replace the placeholder `jakarta-xxx-example` with actual folder names if different.)
 
@@ -38,13 +36,18 @@ Each project is self-contained and can be imported into your favorite IDE (Intel
 \### Prerequisites
 
 \- JDK 11 or higher (Jakarta EE 10 requires Java 11+)
+
 \- A Jakarta EE compatible application server (e.g., Payara, WildFly, Open Liberty, GlassFish)
+
 \- Maven 3.6+ or Gradle 7+
 
 \### Running a Project
 
 1\. Clone the repository:
+
 &nbsp;  ```bash
+
 &nbsp;  git clone https://github.com/amir-memarian/Jakarta-EE-Capability-Examples.git
+
 &nbsp;  cd Jakarta-EE-Capability-Examples
 
