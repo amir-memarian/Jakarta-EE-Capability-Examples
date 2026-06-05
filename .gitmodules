@@ -1,0 +1,3 @@
+[submodule "Core-Example/jakarta-jpa-hibernate"]
+	path = Core-Example/jakarta-jpa-hibernate
+	url = https://github.com/amir-memarian/Jakarta-EE-Capability-Examples.git
