@@ -9,65 +9,47 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String city;
     private String street;
-    private String postalCode;
+    private String city;
+    private String state;
+    private String zipCode;
+    private String country;
 
+    // One-to-One با Customer (سمت owner)
     @OneToOne
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "customer_id", unique = true)
     private Customer customer;
 
-    // Constructors, Getters, Setters
+    // Constructors
+    public Address() {}
 
-    public Address(Long id, String city, String street, String postalCode, Customer customer) {
-        this.id = id;
-        this.city = city;
+    public Address(String street, String city, String state, String zipCode, String country) {
         this.street = street;
-        this.postalCode = postalCode;
-        this.customer = customer;
-    }
-
-    public Address() {
-
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
         this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+        this.country = country;
     }
 
-    public String getStreet() {
-        return street;
-    }
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setStreet(String street) {
-        this.street = street;
-    }
+    public String getStreet() { return street; }
+    public void setStreet(String street) { this.street = street; }
 
-    public String getPostalCode() {
-        return postalCode;
-    }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
 
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
-    }
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
 
-    public Customer getCustomer() {
-        return customer;
-    }
+    public String getZipCode() { return zipCode; }
+    public void setZipCode(String zipCode) { this.zipCode = zipCode; }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
+    public String getCountry() { return country; }
+    public void setCountry(String country) { this.country = country; }
+
+    public Customer getCustomer() { return customer; }
+    public void setCustomer(Customer customer) { this.customer = customer; }
 }

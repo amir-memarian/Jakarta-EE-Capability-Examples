@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Management System</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .container { display: flex; gap: 20px; }
+        .panel { flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 5px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        input, select { margin: 5px; padding: 5px; }
+        button { margin: 5px; padding: 5px 10px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+<h1>🏦 Bank Management System - Jakarta JPA Hibernate</h1>
+
+<div class="container">
+    <!-- Customers Panel -->
+    <div class="panel">
+        <h2>Customers</h2>
+        <div>
+            <input type="text" id="custName" placeholder="Full Name">
+            <input type="email" id="custEmail" placeholder="Email">
+            <button onclick="createCustomer()">Add Customer</button>
+        </div>
+        <table id="customersTable">
+            <thead>
+            <tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Accounts Panel -->
+    <div class="panel">
+        <h2>Accounts</h2>
+        <div>
+            <select id="accountCustomerId"></select>
+            <input type="text" id="accNumber" placeholder="Account Number">
+            <select id="accType">
+                <option value="SAVINGS">Savings</option>
+                <option value="CHECKING">Checking</option>
+                <option value="BUSINESS">Business</option>
+            </select>
+            <input type="number" id="initialBalance" placeholder="Initial Balance">
+            <button onclick="createAccount()">Add Account</button>
+        </div>
+        <table id="accountsTable">
+            <thead>
+            <tr><th>ID</th><th>Number</th><th>Type</th><th>Balance</th><th>Customer</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="container" style="margin-top: 20px;">
+    <!-- Transactions Panel -->
+    <div class="panel">
+        <h2>Transactions</h2>
+        <div>
+            <select id="transactionAccountId"></select>
+            <select id="transType">
+                <option value="DEPOSIT">Deposit</option>
+                <option value="WITHDRAWAL">Withdrawal</option>
+            </select>
+            <input type="number" id="transAmount" placeholder="Amount">
+            <button onclick="createTransaction()">Execute</button>
+        </div>
+        <table id="transactionsTable">
+            <thead>
+            <tr><th>Date</th><th>Type</th><th>Amount</th><th>Description</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Services Panel -->
+    <div class="panel">
+        <h2>Services</h2>
+        <div>
+            <select id="serviceCustomerId"></select>
+            <select id="serviceName"></select>
+            <button onclick="assignService()">Assign Service</button>
+        </div>
+        <table id="servicesTable">
+            <thead>
+            <tr><th>Service Name</th><th>Description</th><th>Fee</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Load all data on page load
+    window.onload = function() {
+        loadCustomers();
+        loadAccounts();
+        loadServices();
+        loadCustomerSelects();
+    };
+
+    async function loadCustomers() {
+        const response = await fetch('/api/customers');
+        const customers = await response.json();
+        const tbody = document.querySelector('#customersTable tbody');
+        tbody.innerHTML = customers.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td>${c.fullName}</td>
+                    <td>${c.email}</td>
+                    <td><button onclick="deleteCustomer(${c.id})">Delete</button></td>
+                </tr>
+            `).join('');
+    }
+
+    async function loadAccounts() {
+        const response = await fetch('/api/accounts');
+        const accounts = await response.json();
+        const tbody = document.querySelector('#accountsTable tbody');
+        tbody.innerHTML = accounts.map(a => `
+                <tr>
+                    <td>${a.id}</td>
+                    <td>${a.accountNumber}</td>
+                    <td>${a.accountType}</td>
+                    <td>$${a.balance}</td>
+                    <td>${a.customer?.fullName || 'N/A'}</td>
+                </tr>
+            `).join('');
+    }
+
+    async function loadCustomerSelects() {
+        const response = await fetch('/api/customers');
+        const customers = await response.json();
+        const selects = ['accountCustomerId', 'transactionAccountId', 'serviceCustomerId'];
+        selects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            if(select) {
+                select.innerHTML = customers.map(c =>
+                    `<option value="${c.id}">${c.fullName}</option>`
+                ).join('');
+            }
+        });
+    }
+
+    async function createCustomer() {
+        const name = document.getElementById('custName').value;
+        const email = document.getElementById('custEmail').value;
+        await fetch('/api/customers', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({fullName: name, email: email})
+        });
+        loadCustomers();
+        loadCustomerSelects();
+    }
+
+    async function createAccount() {
+        const customerId = document.getElementById('accountCustomerId').value;
+        const accountNumber = document.getElementById('accNumber').value;
+        const accountType = document.getElementById('accType').value;
+        const balance = document.getElementById('initialBalance').value;
+
+        await fetch('/api/accounts', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                accountNumber: accountNumber,
+                accountType: accountType,
+                balance: parseFloat(balance),
+                customer: {id: parseInt(customerId)}
+            })
+        });
+        loadAccounts();
+    }
+
+    async function createTransaction() {
+        const accountId = document.getElementById('transactionAccountId').value;
+        const type = document.getElementById('transType').value;
+        const amount = document.getElementById('transAmount').value;
+
+        const endpoint = type === 'DEPOSIT' ? '/api/accounts/deposit' : '/api/accounts/withdraw';
+        await fetch(endpoint, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                accountId: parseInt(accountId),
+                amount: parseFloat(amount)
+            })
+        });
+        loadAccounts();
+    }
+
+    async function loadServices() {
+        const response = await fetch('/api/services');
+        const services = await response.json();
+        const tbody = document.querySelector('#servicesTable tbody');
+        tbody.innerHTML = services.map(s => `
+                <tr>
+                    <td>${s.name}</td>
+                    <td>${s.description}</td>
+                    <td>$${s.fee}</td>
+                </tr>
+            `).join('');
+
+        // Populate service select
+        const serviceSelect = document.getElementById('serviceName');
+        serviceSelect.innerHTML = services.map(s =>
+            `<option value="${s.id}">${s.name} - $${s.fee}</option>`
+        ).join('');
+    }
+
+    async function assignService() {
+        const customerId = document.getElementById('serviceCustomerId').value;
+        const serviceId = document.getElementById('serviceName').value;
+
+        await fetch('/api/customers/services', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                customerId: parseInt(customerId),
+                serviceId: parseInt(serviceId)
+            })
+        });
+        alert('Service assigned successfully!');
+    }
+</script>
+</body>
+</html>
