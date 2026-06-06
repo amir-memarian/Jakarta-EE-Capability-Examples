@@ -1,75 +1,91 @@
 package com.bank.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.annotations.Expose;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "accounts")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"customer", "transactions"})
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Expose
     private Long id;
 
     @Column(unique = true, nullable = false)
+    @Expose
     private String accountNumber;
 
-    private String accountType; // "SAVINGS", "CHECKING", "BUSINESS"
+    @Enumerated(EnumType.STRING)
+    @Expose
+    private AccountType accountType;
 
-    private Double balance;
+    @Expose
+    private Double balance = 0.0;
 
     @Temporal(TemporalType.DATE)
+    @Expose
     private Date openingDate;
 
+    @Expose
     private Boolean isActive = true;
 
-    // Many-to-One با Customer
+    // Many-to-One with Customer
     @ManyToOne
     @JoinColumn(name = "customer_id")
+    @JsonIgnore
     private Customer customer;
 
-    // One-to-Many با Transaction
+    // One-to-Many with Transaction
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Transaction> transactions = new ArrayList<>();
 
-    // Constructors
-    public Account() {}
+    public enum AccountType {
+        SAVINGS("حساب پس‌انداز"),
+        CHECKING("حساب جاری"),
+        BUSINESS("حساب تجاری");
 
-    public Account(String accountNumber, String accountType, Double balance) {
+        private final String persianName;
+
+        AccountType(String persianName) {
+            this.persianName = persianName;
+        }
+
+        public String getPersianName() {
+            return persianName;
+        }
+    }
+
+    public Account(String accountNumber, AccountType accountType, Double balance) {
         this.accountNumber = accountNumber;
         this.accountType = accountType;
         this.balance = balance;
         this.openingDate = new Date();
     }
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // Business methods
+    public void deposit(Double amount) {
+        this.balance += amount;
+    }
 
-    public String getAccountNumber() { return accountNumber; }
-    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
-
-    public String getAccountType() { return accountType; }
-    public void setAccountType(String accountType) { this.accountType = accountType; }
-
-    public Double getBalance() { return balance; }
-    public void setBalance(Double balance) { this.balance = balance; }
-
-    public Date getOpeningDate() { return openingDate; }
-    public void setOpeningDate(Date openingDate) { this.openingDate = openingDate; }
-
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
-
-    public Customer getCustomer() { return customer; }
-    public void setCustomer(Customer customer) { this.customer = customer; }
-
-    public List<Transaction> getTransactions() { return transactions; }
-    public void setTransactions(List<Transaction> transactions) { this.transactions = transactions; }
-
-    public void addTransaction(Transaction transaction) {
-        transactions.add(transaction);
-        transaction.setAccount(this);
+    public boolean withdraw(Double amount) {
+        if (this.balance >= amount) {
+            this.balance -= amount;
+            return true;
+        }
+        return false;
     }
 }

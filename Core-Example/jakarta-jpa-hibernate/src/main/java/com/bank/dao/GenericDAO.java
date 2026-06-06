@@ -4,6 +4,7 @@ import com.bank.util.JpaUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class GenericDAO<T, ID> {
     protected EntityManager em;
@@ -31,17 +32,19 @@ public abstract class GenericDAO<T, ID> {
             em.getTransaction().commit();
             return entity;
         } catch (Exception e) {
-            em.getTransaction().rollback();
-            throw e;
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error creating entity: " + e.getMessage(), e);
         } finally {
             closeEntityManager();
         }
     }
 
-    public T findById(ID id) {
+    public Optional<T> findById(ID id) {
         openEntityManager();
         try {
-            return em.find(entityClass, id);
+            return Optional.ofNullable(em.find(entityClass, id));
         } finally {
             closeEntityManager();
         }
@@ -50,7 +53,23 @@ public abstract class GenericDAO<T, ID> {
     public List<T> findAll() {
         openEntityManager();
         try {
-            TypedQuery<T> query = em.createQuery("SELECT e FROM " + entityClass.getSimpleName() + " e", entityClass);
+            TypedQuery<T> query = em.createQuery(
+                    "SELECT e FROM " + entityClass.getSimpleName() + " e ORDER BY e.id DESC",
+                    entityClass);
+            return query.getResultList();
+        } finally {
+            closeEntityManager();
+        }
+    }
+
+    public List<T> findAll(int page, int size) {
+        openEntityManager();
+        try {
+            TypedQuery<T> query = em.createQuery(
+                    "SELECT e FROM " + entityClass.getSimpleName() + " e ORDER BY e.id DESC",
+                    entityClass);
+            query.setFirstResult(page * size);
+            query.setMaxResults(size);
             return query.getResultList();
         } finally {
             closeEntityManager();
@@ -65,8 +84,10 @@ public abstract class GenericDAO<T, ID> {
             em.getTransaction().commit();
             return merged;
         } catch (Exception e) {
-            em.getTransaction().rollback();
-            throw e;
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error updating entity: " + e.getMessage(), e);
         } finally {
             closeEntityManager();
         }
@@ -82,10 +103,27 @@ public abstract class GenericDAO<T, ID> {
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            em.getTransaction().rollback();
-            throw e;
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error deleting entity: " + e.getMessage(), e);
         } finally {
             closeEntityManager();
         }
+    }
+
+    public long count() {
+        openEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT COUNT(e) FROM " + entityClass.getSimpleName() + " e",
+                    Long.class).getSingleResult();
+        } finally {
+            closeEntityManager();
+        }
+    }
+
+    public boolean exists(ID id) {
+        return findById(id).isPresent();
     }
 }

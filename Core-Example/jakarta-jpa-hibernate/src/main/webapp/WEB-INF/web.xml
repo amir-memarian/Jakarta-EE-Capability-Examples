@@ -6,11 +6,20 @@
 
     <display-name>Jakarta JPA Hibernate Bank App</display-name>
 
+    <description>
+        Banking System with Jakarta EE 11, JPA, Hibernate, and Connection Pool
+        Demonstrates One-to-One, One-to-Many, and Many-to-Many relationships
+    </description>
+
     <resource-ref>
-        <description>DB Connection Pool</description>
+        <description>Database Connection Pool for MySQL</description>
         <res-ref-name>jdbc/BankPool</res-ref-name>
         <res-type>javax.sql.DataSource</res-type>
         <res-auth>Container</res-auth>
     </resource-ref>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
 
 </web-app>

@@ -8,22 +8,18 @@ public class JpaUtil {
     private static final EntityManagerFactory emf;
 
     static {
-        System.out.println("=== Initializing JpaUtil ===");
         try {
-            System.out.println("Creating EntityManagerFactory...");
             emf = Persistence.createEntityManagerFactory("bankPU");
-            System.out.println("EntityManagerFactory created successfully!");
+            System.out.println("✅ JPA EntityManagerFactory initialized successfully!");
         } catch (Throwable ex) {
-            System.err.println("!!! FAILED to create EntityManagerFactory !!!");
-            System.err.println("Error: " + ex.getMessage());
-            ex.printStackTrace();
+            System.err.println("❌ Failed to create EntityManagerFactory: " + ex.getMessage());
             throw new ExceptionInInitializerError(ex);
         }
     }
 
     public static EntityManager getEntityManager() {
         if (emf == null) {
-            throw new IllegalStateException("EntityManagerFactory is null!");
+            throw new IllegalStateException("EntityManagerFactory is not initialized!");
         }
         return emf.createEntityManager();
     }
@@ -31,6 +27,7 @@ public class JpaUtil {
     public static void close() {
         if (emf != null && emf.isOpen()) {
             emf.close();
+            System.out.println("✅ JPA EntityManagerFactory closed.");
         }
     }
 }

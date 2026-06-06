@@ -19,13 +19,23 @@ Step 2: Create a project in IntelliJ IDEA
         JPA / Hibernate (we will complete it later in pom.xml)
 
 Step 3: Set up pom.xml
+    jakarta.persistence-api
+    hibernate-core
+    mysql-connector-java
+    jakarta.servlet.jsp.jstl-api (optional)
+    jakarta.servlet.jsp.jstl (optional)
+    gson
+    lombok
+    junit-jupiter-api
+    junit-jupiter-engine
+
 
 Step 4: Create MySQL Database
     CREATE DATABASE bankdb;
     USE bankdb;
     -- (optional - Hibernate creates the tables itself)
 
-Step 5: Configure Connection Pool in Tomcat
+Step 5: Configure Connection Pool in Tomcat or src/main/webapp/META-INF/context.xml
     Change $CATALINA-HOME/conf/context.xml
     <Context>
         <Resource name="jdbc/BankPool"
@@ -41,17 +51,45 @@ Step 5: Configure Connection Pool in Tomcat
     </Context>
     Note: Replace your_password_here with your MySQL password.
 
-Step 6: Change persistence.xml file
+Step 6: Change resources/META-INF/persistence.xml file
+    <persistence-unit name="bankPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <non-jta-data-source>java:comp/env/jdbc/BankPool</non-jta-data-source>
+        <properties>
+            <property name="jakarta.persistence.schema-generation.database.action" value="create"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
+    </persistence-unit>
 
 Step 7: Create Entity Classes (Model)
+    # Entity classes with JPA annotations
 
-Step 8: Create the JPA Utility Class
+Step 8: Create DTO Classes (Response/Request)
+    # Data Transfer Objects
 
-Step 9: Create Servlet for CRUD
+Step 9: Create the JPA Utility Class
+    # Utilities
 
-Step 10: Create web.xml file (optional for Jakarta EE 11)
+Step 10: Create DAO Classes
+    # Data Access Objects
 
-Step 11: Build and Deploy on Tomcat
+Step 11: CustomerServlet (Full REST API)
+    # REST API Servlets
+
+Step 12: AccountServlet  (Full REST API)
+    # REST API Servlets
+
+Step 13: Index.html File (Simple Frontend)
+
+Step 14: Create web.xml file
+
+Step 15: .gitignore file
+
+Step 16: Run command : mvn clean package
+
+Step 17: Build and Deploy on Tomcat
     Method 1: Using Maven (Generate WAR)
         cd jakarta-jpa-hibernate
         mvn clean package
@@ -69,13 +107,8 @@ Step 11: Build and Deploy on Tomcat
         Apply → OK
         Run (Shift+F10)
 
-Step 12: Test the project
-    http://localhost:8080/jakarta-jpa-hibernate/customers
+Step 18: Test the project
+    http://localhost:8080/jakarta-jpa-hibernate/
 
-    CRUD operations:
-    Create: Fill out the form and submit
-    Read: Display all customers in the table
-    Update: (Requires development in Servlet)
-    Delete: By sending a DELETE request (with a tool like Postman)
-    Postman:
-    DELETE http://localhost:8080/jakarta-jpa-hibernate/customers?id=1
+Step 19: Review the log
+tail -f {tomcat-home}/logs/catalina.out

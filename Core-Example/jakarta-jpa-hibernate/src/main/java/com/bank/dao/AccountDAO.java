@@ -1,8 +1,10 @@
 package com.bank.dao;
 
 import com.bank.entity.Account;
+import com.bank.entity.Transaction;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
 
 public class AccountDAO extends GenericDAO<Account, Long> {
 
@@ -10,13 +12,13 @@ public class AccountDAO extends GenericDAO<Account, Long> {
         super(Account.class);
     }
 
-    public Account findByAccountNumber(String accountNumber) {
+    public Optional<Account> findByAccountNumber(String accountNumber) {
         openEntityManager();
         try {
             TypedQuery<Account> query = em.createQuery(
                     "SELECT a FROM Account a WHERE a.accountNumber = :accNum", Account.class);
             query.setParameter("accNum", accountNumber);
-            return query.getSingleResult();
+            return query.getResultStream().findFirst();
         } finally {
             closeEntityManager();
         }
@@ -26,7 +28,8 @@ public class AccountDAO extends GenericDAO<Account, Long> {
         openEntityManager();
         try {
             TypedQuery<Account> query = em.createQuery(
-                    "SELECT a FROM Account a WHERE a.customer.id = :custId", Account.class);
+                    "SELECT a FROM Account a WHERE a.customer.id = :custId ORDER BY a.id DESC",
+                    Account.class);
             query.setParameter("custId", customerId);
             return query.getResultList();
         } finally {
@@ -34,7 +37,7 @@ public class AccountDAO extends GenericDAO<Account, Long> {
         }
     }
 
-    public List<Account> findByAccountType(String accountType) {
+    public List<Account> findByAccountType(Account.AccountType accountType) {
         openEntityManager();
         try {
             TypedQuery<Account> query = em.createQuery(
@@ -46,37 +49,91 @@ public class AccountDAO extends GenericDAO<Account, Long> {
         }
     }
 
-    public void deposit(Long accountId, Double amount) {
+    public List<Account> findActiveAccounts() {
         openEntityManager();
         try {
-            em.getTransaction().begin();
-            Account account = em.find(Account.class, accountId);
-            if (account != null) {
-                account.setBalance(account.getBalance() + amount);
-                em.merge(account);
-            }
-            em.getTransaction().commit();
-        } catch (Exception e) {
-            em.getTransaction().rollback();
-            throw e;
+            return em.createQuery(
+                            "SELECT a FROM Account a WHERE a.isActive = true", Account.class)
+                    .getResultList();
         } finally {
             closeEntityManager();
         }
     }
 
-    public void withdraw(Long accountId, Double amount) {
+    public Transaction deposit(Long accountId, Double amount, String description) {
         openEntityManager();
         try {
             em.getTransaction().begin();
             Account account = em.find(Account.class, accountId);
-            if (account != null && account.getBalance() >= amount) {
-                account.setBalance(account.getBalance() - amount);
-                em.merge(account);
+            if (account == null) {
+                throw new RuntimeException("Account not found");
             }
+
+            account.deposit(amount);
+            em.merge(account);
+
+            Transaction transaction = new Transaction(
+                    amount,
+                    Transaction.TransactionType.DEPOSIT,
+                    description
+            );
+            transaction.setAccount(account);
+            em.persist(transaction);
+
             em.getTransaction().commit();
+            return transaction;
         } catch (Exception e) {
-            em.getTransaction().rollback();
-            throw e;
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error depositing: " + e.getMessage(), e);
+        } finally {
+            closeEntityManager();
+        }
+    }
+
+    public Transaction withdraw(Long accountId, Double amount, String description) {
+        openEntityManager();
+        try {
+            em.getTransaction().begin();
+            Account account = em.find(Account.class, accountId);
+            if (account == null) {
+                throw new RuntimeException("Account not found");
+            }
+
+            if (!account.withdraw(amount)) {
+                throw new RuntimeException("Insufficient balance");
+            }
+            em.merge(account);
+
+            Transaction transaction = new Transaction(
+                    amount,
+                    Transaction.TransactionType.WITHDRAWAL,
+                    description
+            );
+            transaction.setAccount(account);
+            em.persist(transaction);
+
+            em.getTransaction().commit();
+            return transaction;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error withdrawing: " + e.getMessage(), e);
+        } finally {
+            closeEntityManager();
+        }
+    }
+
+    public Double getTotalBalanceByCustomer(Long customerId) {
+        openEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT COALESCE(SUM(a.balance), 0) FROM Account a WHERE a.customer.id = :custId",
+                            Double.class)
+                    .setParameter("custId", customerId)
+                    .getSingleResult();
         } finally {
             closeEntityManager();
         }
