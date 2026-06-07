@@ -19,15 +19,13 @@ Step 2: Create a project in IntelliJ IDEA
         JPA / Hibernate (we will complete it later in pom.xml)
 
 Step 3: Set up pom.xml
-    jakarta.persistence-api
-    hibernate-core
-    mysql-connector-java
-    jakarta.servlet.jsp.jstl-api (optional)
-    jakarta.servlet.jsp.jstl (optional)
-    gson
-    lombok
-    junit-jupiter-api
-    junit-jupiter-engine
+    jakarta.servlet-api         (Servlet)
+    jakarta.persistence-api     (JPA)
+    hibernate-core              (Provider JPA: Hibernate)
+    mysql-connector-java        (DataBase: mySql)
+    lombok                      (Getter & Setter - Constructor)
+    junit-jupiter-api           (Write Test: Junit)
+    junit-jupiter-engine        (Run Test: Junit)
 
 
 Step 4: Create MySQL Database
@@ -35,61 +33,37 @@ Step 4: Create MySQL Database
     USE bankdb;
     -- (optional - Hibernate creates the tables itself)
 
-Step 5: Configure Connection Pool in Tomcat or src/main/webapp/META-INF/context.xml
-    Change $CATALINA-HOME/conf/context.xml
-    <Context>
-        <Resource name="jdbc/BankPool"
-                  auth="Container"
-                  type="javax.sql.DataSource"
-                  driverClassName="com.mysql.cj.jdbc.Driver"
-                  url="jdbc:mysql://localhost:3306/bankdb?useSSL=false&amp;serverTimezone=UTC"
-                  username="root"
-                  password="your_password_here"
-                  maxTotal="20"
-                  maxIdle="10"
-                  maxWaitMillis="-1"/>
-    </Context>
-    Note: Replace your_password_here with your MySQL password.
+Step 5: Change resources/META-INF/persistence.xml file
+        <persistence-unit name="bankPU" transaction-type="RESOURCE_LOCAL">
+            <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+            <properties>
+                <!-- Connecting to MySQL -->
+                <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/bankdb?useSSL=false&amp;serverTimezone=UTC"/>
+                <property name="jakarta.persistence.jdbc.user" value="amir"/>
+                <property name="jakarta.persistence.jdbc.password" value="aMir-123"/>
 
-Step 6: Change resources/META-INF/persistence.xml file
-    <persistence-unit name="bankPU" transaction-type="RESOURCE_LOCAL">
-        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <non-jta-data-source>java:comp/env/jdbc/BankPool</non-jta-data-source>
-        <properties>
-            <property name="jakarta.persistence.schema-generation.database.action" value="create"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
-        </properties>
-    </persistence-unit>
+                <!-- Hibernate settings -->
+                <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL8Dialect"/>
+                <property name="jakarta.persistence.schema-generation.database.action" value="create"/>
+                <property name="hibernate.show_sql" value="true"/>
+                <property name="hibernate.format_sql" value="true"/>
+            </properties>
+        </persistence-unit>
 
-Step 7: Create Entity Classes (Model)
+Step 6: Create Entity Classes (Model)
     # Entity classes with JPA annotations
 
-Step 8: Create DTO Classes (Response/Request)
-    # Data Transfer Objects
+Step 7: Create the JPA Utility Class (Utility)
+    # Utilities : getEntityManager
 
-Step 9: Create the JPA Utility Class
-    # Utilities
+Step 8: Create Servlet (Controller)
 
-Step 10: Create DAO Classes
-    # Data Access Objects
+Step 9: Create web.xml in src/main/webapp/WEB-INF/
 
-Step 11: CustomerServlet (Full REST API)
-    # REST API Servlets
+Step 10: Run command : mvn clean package
 
-Step 12: AccountServlet  (Full REST API)
-    # REST API Servlets
-
-Step 13: Index.html File (Simple Frontend)
-
-Step 14: Create web.xml file
-
-Step 15: .gitignore file
-
-Step 16: Run command : mvn clean package
-
-Step 17: Build and Deploy on Tomcat
+Step 11: Build and Deploy on Tomcat
     Method 1: Using Maven (Generate WAR)
         cd jakarta-jpa-hibernate
         mvn clean package
@@ -107,8 +81,8 @@ Step 17: Build and Deploy on Tomcat
         Apply → OK
         Run (Shift+F10)
 
-Step 18: Test the project
-    http://localhost:8080/jakarta-jpa-hibernate/
+Step 12: Test the project
+        http://localhost:8080/jakarta-jpa-step1/customers
 
-Step 19: Review the log
+Step 13: Review the log
 tail -f {tomcat-home}/logs/catalina.out

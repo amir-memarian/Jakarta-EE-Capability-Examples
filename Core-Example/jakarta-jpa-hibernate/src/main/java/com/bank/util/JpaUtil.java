@@ -5,11 +5,11 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 public class JpaUtil {
-    private static final EntityManagerFactory emf;
+    private static final EntityManagerFactory entityManagerFactory;
 
     static {
         try {
-            emf = Persistence.createEntityManagerFactory("bankPU");
+            entityManagerFactory = Persistence.createEntityManagerFactory("bankPU");
             System.out.println("✅ JPA EntityManagerFactory initialized successfully!");
         } catch (Throwable ex) {
             System.err.println("❌ Failed to create EntityManagerFactory: " + ex.getMessage());
@@ -18,15 +18,15 @@ public class JpaUtil {
     }
 
     public static EntityManager getEntityManager() {
-        if (emf == null) {
+        if (entityManagerFactory == null) {
             throw new IllegalStateException("EntityManagerFactory is not initialized!");
         }
-        return emf.createEntityManager();
+        return entityManagerFactory.createEntityManager();
     }
 
     public static void close() {
-        if (emf != null && emf.isOpen()) {
-            emf.close();
+        if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+            entityManagerFactory.close();
             System.out.println("✅ JPA EntityManagerFactory closed.");
         }
     }
