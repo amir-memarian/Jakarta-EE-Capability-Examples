@@ -134,6 +134,37 @@ public class CustomerServlet extends HttpServlet {
             out.println("</tbody>");
             out.println("</table>");
             out.println("</div>");
+
+            // فرم افتتاح حساب جدید
+            out.println("<div class='form-card' style='margin-top: 30px;'>");
+            out.println("<h3>💳 افتتاح حساب جدید برای مشتری</h3>");
+            out.println("<form method='post' action='" + req.getContextPath() + "/accounts'>");
+            out.println("<div class='form-group'><label>انتخاب مشتری</label>");
+            out.println("<select name='customerId' required>");
+            out.println("<option value=''>انتخاب کنید...</option>");
+
+            for (Customer customer : customers) {
+                out.println("<option value='" + customer.getId() + "'>" + escapeHtml(customer.getFullName()) + "</option>");
+            }
+            out.println("</select></div>");
+
+            out.println("<div class='form-group'><label>شماره حساب</label>");
+            out.println("<input type='text' name='accountNumber' placeholder='مثال: IR580123456789' required></div>");
+
+            out.println("<div class='form-group'><label>نوع حساب</label>");
+            out.println("<select name='accountType'>");
+            out.println("<option value='SAVINGS'>پس‌انداز</option>");
+            out.println("<option value='CHECKING'>جاری</option>");
+            out.println("<option value='BUSINESS'>تجاری</option>");
+            out.println("</select></div>");
+
+            out.println("<div class='form-group'><label>موجودی اولیه</label>");
+            out.println("<input type='number' name='balance' value='0' step='1000'></div>");
+
+            out.println("<button type='submit'>افتتاح حساب</button>");
+            out.println("</form>");
+            out.println("</div>");
+
             out.println("</body>");
             out.println("</html>");
 
@@ -174,6 +205,7 @@ public class CustomerServlet extends HttpServlet {
             out.println("<div class='form-group'><label>نام کامل:</label><input type='text' name='fullName' value='" + escapeHtml(customer.getFullName()) + "' required></div>");
             out.println("<div class='form-group'><label>ایمیل:</label><input type='email' name='email' value='" + (customer.getEmail() != null ? escapeHtml(customer.getEmail()) : "") + "'></div>");
             out.println("<div class='form-group'><label>تلفن:</label><input type='text' name='phone' value='" + (customer.getPhone() != null ? escapeHtml(customer.getPhone()) : "") + "'></div>");
+
             out.println("<hr><h3>📍 آدرس</h3>");
             out.println("<div class='form-group'><label>خیابان:</label><input type='text' name='street' value='" + (address != null ? escapeHtml(address.getStreet()) : "") + "'></div>");
             out.println("<div class='form-group'><label>شهر:</label><input type='text' name='city' value='" + (address != null ? escapeHtml(address.getCity()) : "") + "'></div>");
@@ -182,7 +214,15 @@ public class CustomerServlet extends HttpServlet {
             out.println("<div class='form-group'><label>کشور:</label><input type='text' name='country' value='" + (address != null ? escapeHtml(address.getCountry()) : "ایران") + "'></div>");
             out.println("<hr><button type='submit'>💾 ذخیره</button>");
             out.println("<a href='" + req.getContextPath() + "/customers'><button type='button'>❌ انصراف</button></a>");
-            out.println("</form></div></body></html>");
+            out.println("</form></div>");
+
+            out.println("<div style='margin-top: 20px; text-align: center;'>");
+            out.println("<a href='" + req.getContextPath() + "/accounts?action=customer&customerId=" + customer.getId() + "'>");
+            out.println("<button type='button' style='background: #FF9800;'>💰 مشاهده حساب‌های این مشتری</button>");
+            out.println("</a>");
+            out.println("</div>");
+
+            out.println("</body></html>");
 
         } catch (Exception e) {
             e.printStackTrace();
