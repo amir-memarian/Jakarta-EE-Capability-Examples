@@ -103,8 +103,9 @@ public class CustomerServlet extends HttpServlet {
             // جدول مشتریان
             out.println("<h3>📋 لیست مشتریان</h3>");
             out.println("<table>");
-            out.println("<thead><tr><th>ID</th><th>نام کامل</th><th>ایمیل</th><th>تلفن</th><th>آدرس</th><th>عملیات</th></tr></thead>");
+            out.println("<thead><tr><th>ID</th><th>نام کامل</th><th>ایمیل</th><th>تلفن</th><th>آدرس</th><th>خدمات</th><th>عملیات</th></tr></thead>");
             out.println("<tbody>");
+
 
             for (Customer customer : customers) {
                 out.println("<tr>");
@@ -124,9 +125,25 @@ public class CustomerServlet extends HttpServlet {
                 out.println("</td>");
 
                 out.println("<td>");
-                out.println("<a href='" + req.getContextPath() + "/customers?action=edit&id=" + customer.getId() + "'><button class='btn-edit'>✏️ ویرایش</button></a> ");
-                out.println("<a href='" + req.getContextPath() + "/address?customerId=" + customer.getId() + "'><button class='btn-address'>📍 آدرس</button></a> ");
-                out.println("<a href='" + req.getContextPath() + "/customers?action=delete&id=" + customer.getId() + "' onclick='return confirm(\"آیا از حذف مطمئن هستید؟\")'><button class='btn-delete'>🗑️ حذف</button></a>");
+                if (customer.getServices() != null && !customer.getServices().isEmpty()) {
+                    out.println("<span style='background:#9C27B0; color:white; padding:2px 8px; border-radius:15px; font-size:11px;'>"
+                            + customer.getServices().size() + " سرویس</span><br>");
+                    out.println("<small>" + customer.getServicesNames() + "</small>");
+                } else {
+                    out.println("<span style='color:#999;'>هیچ سرویسی ثبت نشده</span>");
+                }
+                out.println("</td>");
+
+
+                out.println("<td>");
+                out.println("<a href='" + req.getContextPath() + "/customers?action=edit&id=" + customer.getId() + "'>"+
+                        "<button class='btn-edit'>✏️ ویرایش</button></a> ");
+                out.println("<a href='" + req.getContextPath() + "/address?customerId=" + customer.getId() + "'>"+
+                        "<button class='btn-address'>📍 آدرس</button></a> ");
+                out.println("<a href='" + req.getContextPath() + "/customers?action=delete&id=" + customer.getId() + "' onclick='return confirm(\"آیا از حذف مطمئن هستید؟\")'>" +
+                        "<button class='btn-delete'>🗑️ حذف</button></a>");
+                out.println("<a href='" + req.getContextPath() + "/services?action=customer&customerId=" + customer.getId() + "'>"+
+                        "<button type='button' style='background:#9C27B0; margin-top:5px;'>🎯 خدمات</button></a>");
                 out.println("</td>");
                 out.println("</tr>");
             }
@@ -134,6 +151,8 @@ public class CustomerServlet extends HttpServlet {
             out.println("</tbody>");
             out.println("</table>");
             out.println("</div>");
+
+
 
             // فرم افتتاح حساب جدید
             out.println("<div class='form-card' style='margin-top: 30px;'>");

@@ -33,10 +33,17 @@ public class Customer {
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
     private Address address;
 
-    // رابطه One-to-Many با Account (جدید)
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Account> accounts = new ArrayList<>();
 
+    // رابطه Many-to-Many با Service (جدید)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "customer_service",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "service_id")
+    )
+    private List<Service> services = new ArrayList<>();
 
     public Customer() {
         this.createdAt = LocalDateTime.now();
@@ -57,22 +64,16 @@ public class Customer {
         }
     }
 
-    public List<Account> getAccounts() { return accounts; }
-    public void setAccounts(List<Account> accounts) { this.accounts = accounts; }
-
-    // متد کمکی برای اضافه کردن حساب
     public void addAccount(Account account) {
         accounts.add(account);
         account.setCustomer(this);
     }
 
-    // متد کمکی برای حذف حساب
     public void removeAccount(Account account) {
         accounts.remove(account);
         account.setCustomer(null);
     }
 
-    // متد کمکی برای گرفتن موجودی کل
     public Double getTotalBalance() {
         return accounts.stream()
                 .filter(Account::getIsActive)
@@ -80,9 +81,28 @@ public class Customer {
                 .sum();
     }
 
-    // متد کمکی برای تعداد حساب‌های فعال
     public int getActiveAccountsCount() {
         return (int) accounts.stream().filter(Account::getIsActive).count();
+    }
+
+    // متدهای کمکی برای Service (جدید)
+    public void addService(Service service) {
+        services.add(service);
+        if (!service.getCustomers().contains(this)) {
+            service.getCustomers().add(this);
+        }
+    }
+
+    public void removeService(Service service) {
+        services.remove(service);
+        service.getCustomers().remove(this);
+    }
+
+    public String getServicesNames() {
+        return services.stream()
+                .map(Service::getName)
+                .reduce((a, b) -> a + "، " + b)
+                .orElse("هیچ");
     }
 
     public String getFullAddress() {
